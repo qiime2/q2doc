@@ -11,8 +11,8 @@ import sys
 import json
 
 from q2doc.common import is_book, write_plugin
-from q2doc.cache import refresh_cache
-from q2doc.myst import run_spec, run_directive
+from q2doc.cache import get_cache
+from q2doc.directives import run_spec, run_directive
 
 
 ROOT_COMMAND_HELP = """\
@@ -35,7 +35,7 @@ def install(book):
 
 @root.command()
 def refresh_cache():
-    pass
+    get_cache(refresh=True)
 
 
 myst_help = """
