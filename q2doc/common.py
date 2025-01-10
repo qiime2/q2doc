@@ -13,17 +13,18 @@ def write_plugin(dir, plugin_name):
     from qiime2.sdk import PluginManager
     pm = PluginManager()
     plugin = pm.get_plugin(name=plugin_name)
+    diversity = pm.get_plugin(name='diversity')
 
     root = os.path.join(dir, 'Plugin-Reference')
     os.makedirs(root, exist_ok=True)
 
     action_root = os.path.join(root, 'actions')
     os.makedirs(action_root, exist_ok=True)
-    for action in plugin.actions:
+    for action in diversity.actions:
         action = action.replace('_', '-')
         with open(os.path.join(action_root, f'{action}.md'), 'w') as fh:
-            fh.write(f'# {action}\n')
-            fh.write(md.directive_md('describe-action', f'types {action}'))
+            fh.write(md.frontmatter_yml(title=action))
+            fh.write(md.directive_md('describe-action', f'diversity {action}'))
 
     artifacts_root = os.path.join(root, 'artifacts')
     os.makedirs(artifacts_root, exist_ok=True)
