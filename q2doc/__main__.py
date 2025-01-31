@@ -10,9 +10,10 @@ import click
 import sys
 import json
 
-from q2doc.common import is_book, write_plugin
+from q2doc.common import is_book, write_plugin, write_bibtex
 from q2doc.cache import get_cache
-from q2doc.directives import run_spec, run_directive
+from q2doc.directives import spec_directives, run_directive
+from q2doc.transforms import spec_transforms, run_transform
 
 
 ROOT_COMMAND_HELP = """\
@@ -48,12 +49,15 @@ This is the implementation of the executable plugin for q2doc:
 
 @root.command(help=myst_help)
 @click.option('--directive', type=str, default=None)
+@click.option('--transform', type=str, default=None)
 @click.argument('stdin', required=False, type=click.File(), default=sys.stdin)
-def myst(directive, stdin):
-    if directive is None:
-        result = run_spec()
-    else:
+def myst(directive, transform, stdin):
+    if directive:
         result = run_directive(directive, json.load(stdin))
+    elif transform:
+        result = run_transform(transform, json.load(stdin))
+    else:
+        result = dict(name='q2doc', **spec_directives(), **spec_transforms())
 
     print(json.dumps(result, indent=2), flush=True, file=sys.stdout)
 
@@ -66,6 +70,7 @@ def autodoc(book):
         raise ValueError('book')
 
     write_plugin(book, 'types')
+    write_bibtex(book, refresh=False)
 
 if __name__ == '__main__':
     root()

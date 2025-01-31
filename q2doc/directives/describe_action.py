@@ -1,5 +1,7 @@
+import inspect
+import textwrap
 import q2doc.myst as md
-from .common import DirectiveHandler, type_to_id
+from .common import DirectiveHandler, type_to_id, format_text, action_to_id, plugin_to_id, format_citations
 
 
 class DescribeAction(DirectiveHandler):
@@ -15,34 +17,55 @@ class DescribeAction(DirectiveHandler):
             for action_name, action in plugin.actions.items():
                 action_name = action.id.replace('_', '-')
                 name = ' '.join([plugin_name, action_name])
-                ast[name] = cls.format_record(name, action)
+                ast[name] = cls.format_record(name, action, plugin)
 
         return ast
 
     @classmethod
-    def format_type(cls, semantic_type):
+    def format_type(cls, qiime_type, path=()):
         import qiime2.sdk.util as util
-        if util.is_primitive_type(semantic_type) and not util.is_union(semantic_type):
-            if util.is_collection_type(semantic_type):
-                pass
+        from qiime2.plugin import Str
+        null_predicate = Str.full_predicate
+
+        ast = []
+        if util.is_union(qiime_type):
+            first = True
+            for inner in qiime_type.members:
+                if not first:
+                    ast.append(md.inline_code_ast(' | '))
+                first = False
+                ast.extend(cls.format_type(inner, path))
+            return ast
+
+        if (util.is_primitive_type(qiime_type)
+                or util.is_visualization_type(qiime_type)
+                or util.is_collection_type(qiime_type)):
+            url = f'xref:qiime2#qiime2.plugin.{qiime_type.name}'
+            ast.append(md.link_ast(md.inline_code_ast(qiime_type.name), url))
+
+            if qiime_type.fields:
+                ast.append(md.inline_code_ast('['))
+                first = True
+                for field in qiime_type.fields:
+                    if not first:
+                        ast.append(md.inline_code_ast(', '))
+                    first = False
+                    ast.extend(cls.format_type(field, ()))
+                ast.append(md.inline_code_ast(']'))
+        else:
+            if path == () and list(qiime_type)[0].equals(qiime_type):
+                temp = str(qiime_type.duplicate(predicate=null_predicate))
+                ast.append(md.cross_reference_ast(md.inline_code_ast(temp), id=type_to_id(temp)))
             else:
-                root = semantic_type.duplicate(predicate=None)
-                url = f'xref:qiime2#qiime2.plugin.{root.name}'
-                return [md.link_ast(root.name, url)]
+                return [md.inline_code_ast(str(qiime_type))]
 
+        if qiime_type.predicate:
+            url = f'xref:qiime2#qiime2.plugin.{qiime_type.predicate.name}'
+            ast.append(md.inline_code_ast(' % '))
+            ast.append(md.link_ast(md.inline_code_ast(str(qiime_type.predicate.name)), url))
+            ast.append(md.inline_code_ast(str(qiime_type.predicate)[len(qiime_type.predicate.name):]))
 
-        if util.is_collection_type(semantic_type) and not util.is_union(semantic_type):
-            inner = semantic_type.fields[0]
-            return [
-                md.text_ast(semantic_type.name),
-                md.text_ast('['),
-                md.cross_reference_ast(str(inner), id=type_to_id(inner)),
-                md.text_ast(']')
-            ]
-        if util.is_semantic_type(semantic_type):
-            return [md.cross_reference_ast(str(semantic_type), id=type_to_id(semantic_type))]
-
-        return [md.text_ast(str(semantic_type))]
+        return ast
 
     @classmethod
     def format_signature(cls, title, entries):
@@ -60,21 +83,22 @@ class DescribeAction(DirectiveHandler):
                 md.text_ast(': '),
             ] + cls.format_type(spec.qiime_type)
 
-            description = '<no description>'
+            description = ['<no description>']
             if spec.has_description():
-                description = spec.description
+                description = format_text(spec.description)
 
             if spec.has_default():
                 if spec.default is None:
                     required = '[optional]'
                 else:
-                    required = f'[default: {spec.default!r}]'
+                    required = [md.text_ast('[default: '),
+                                md.inline_code_ast(repr(spec.default)),
+                                md.text_ast(']')]
             else:
                 required = '[required]'
             required = md.span_ast(required, {'color': 'purple', 'float':'right'})
 
-            params.append((term, md.paragraph_ast(description, required)))
-
+            params.append((term, md.paragraph_ast(description + [required])))
         return [
             md.heading_ast(2, title, id=False),
             md.definition_list_ast(params)
@@ -82,17 +106,52 @@ class DescribeAction(DirectiveHandler):
 
 
     @classmethod
-    def format_record(cls, name, action):
+    def format_record(cls, name, action, plugin):
+        plugin_name, action_name = name.split(' ')
+
         desc = []
+        if action.deprecated:
+            desc.append(md.admonition_ast('This action is deprecated and may be removed in a future version.', title='Deprecated', kind='attention'))
         if action.description is not None:
-            desc = [md.paragraph_ast(action.description)]
+            desc.append(md.paragraph_ast(format_text(action.description)))
+
+        citations = []
+        if plugin.citations or action.citations:
+            plugin_citations = format_citations(plugin_to_id(plugin), plugin.citations)
+            action_citations = format_citations(action_to_id(action), action.citations)
+            combined_citations = plugin_citations
+            if plugin_citations and action_citations:
+                combined_citations += [md.text_ast('; ')]
+            combined_citations += action_citations
+
+            citations = [
+                md.heading_ast(2, 'Citations', id=False),
+                md.paragraph_ast(combined_citations)
+            ]
+
+        examples = []
+        if action.examples:
+            examples.append(md.heading_ast(2, 'Examples', id=False))
+            for idx, (name, func) in enumerate(action.examples.items(), 1):
+                val = textwrap.dedent(f"""
+                    from {func.__module__} import {func.__name__}
+
+                    {func.__name__}(use)
+                """)
+                code = md.code_ast('python', val)
+                code['data'] = dict(deferred=True, scope=f'examples/{plugin_name}/{action_name}/{idx}', source='describe-usage')
+                examples.append(md.heading_ast(3, name, id=False))
+                examples.append(code)
+
 
         return (
-            [md.heading_ast(1, name, id=f'q2-{name}')]
+            [md.heading_ast(1, [md.cross_reference_ast(plugin_name, id=plugin_to_id(plugin_name)), md.text_ast(' '), md.text_ast(action_name)], id=action_to_id(action))]
             + desc
+            + citations
             + cls.format_signature('Inputs', action.signature.inputs)
             + cls.format_signature('Parameters', action.signature.parameters)
             + cls.format_signature('Outputs', action.signature.outputs)
+            + examples
         )
 
     @classmethod
@@ -105,7 +164,7 @@ class DescribeAction(DirectiveHandler):
         }
 
     @classmethod
-    def apply_options(cls, ast, skip_heading=False):
+    def apply_options(cls, ast, node, skip_heading=False):
         if skip_heading:
             heading = ast[0]
             ast[0] = md.target_ast(heading['label'])
