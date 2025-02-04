@@ -6,6 +6,7 @@ from .common import _build_url
 class MystCLIUsage(CLIUsage):
     def __init__(self, data_dir, auto_collect_size):
         super().__init__(action_collection_size=auto_collect_size)
+        self.scope = dict(use=self)
         self.data_dir = data_dir
 
     def _download_file(self, var):

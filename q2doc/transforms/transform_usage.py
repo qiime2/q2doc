@@ -27,18 +27,24 @@ class TransformUsage(Transform):
         from q2doc.drivers.execution import MystExecUsage
         from q2doc.drivers.q2cli import MystCLIUsage
         from q2doc.drivers.python import MystPythonUsage
+        from q2doc.drivers.galaxy import MystGalaxyUsage
+        from q2doc.drivers.r import MystRtifactUsage
         return (MystExecUsage(self.scope, AUTO_COLLECT), [
             dict(name='[Command Line]', sync='cli', driver=MystCLIUsage(self.scope, AUTO_COLLECT)),
-            dict(name='[Python API]', sync='python', driver=MystPythonUsage(self.scope, AUTO_COLLECT))
+            dict(name='[Python API]', sync='python', driver=MystPythonUsage(self.scope, AUTO_COLLECT)),
+            dict(name='[R API]', sync='r', driver=MystRtifactUsage(self.scope)),
+            dict(name='[Galaxy]', sync='galaxy', driver=MystGalaxyUsage(self.scope))
         ])
 
     def setup_scope(self, node):
-        scope = os.path.join('data', node['data'].get('scope'))
+        scope = node['data'].get('scope')
         if self.scope is None and scope is None:
             raise Exception('No initial scope defined.')
+
         if scope is not None:
-            os.makedirs(scope, exist_ok=True)
-            self.scope = scope
+            self.scope = os.path.join('data', scope)
+            os.makedirs(self.scope, exist_ok=True)
+
         if self.scope not in self.ctx:
             self.ctx[self.scope] = self.init_drivers()
 
@@ -54,10 +60,10 @@ class TransformUsage(Transform):
                 tabs = []
                 try:
                     exec_driver, drivers = self.setup_scope(node)
-                    exec(source, dict(use=exec_driver))
+                    exec(source, exec_driver.scope)
                     result = exec_driver.render(flush=True)
                     for interface in drivers:
-                        exec(source, dict(use=interface['driver']))
+                        exec(source, interface['driver'].scope)
                         rendered = interface['driver'].render(flush=True)
                         if rendered is None:
                             continue

@@ -8,6 +8,7 @@ import q2doc.myst as md
 class MystPythonUsage(ArtifactAPIUsage):
     def __init__(self, data_dir, auto_collect_size):
         super().__init__(action_collection_size=auto_collect_size)
+        self.scope = dict(use=self)
         self.data_dir = data_dir
 
     def _to_cli_var(self, var):

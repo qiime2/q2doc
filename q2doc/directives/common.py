@@ -42,16 +42,16 @@ def plugin_to_id(plugin):
 
 
 regex = re.compile(r"""
-  \W
-  (?P<outer>                    # match inside word break
-    (?P<type>`|__|\*\*|\*|_)    # capture type
-      (?P<content>.*?)          # lazy match content
-    (?P=type)                   # force closing type
+  (?:^|\W)
+  (?P<outer>                     # match inside word break
+    (?P<type>``|`|__|\*\*|\*|_)  # capture type
+      (?P<content>.*?)           # lazy match content
+    (?P=type)                    # force closing type
   )
-  \W
+  (?:\W|$)
 |                                           # Alternative
   (?P<url>
-    https?:\/\/(?:[-a-zA-Z0-9-]{1,256}\.)+[a-z]{2,15}  # host
+    https?:\/\/(?:[-a-zA-Z0-9-]{1,256}\.)+[a-z]{2,15}     # host
     (?::\d+)?                                             # port
     (?:
       \/?[-a-zA-Z0-9@:%_+~#?&/=.]*                        # path with
@@ -68,6 +68,7 @@ style_map = {
     '_': 'emphasis',
     '*': 'emphasis',
     '`': 'inlineCode',
+    '``': 'inlineCode',
     None: 'link'
 }
 def format_text(text):

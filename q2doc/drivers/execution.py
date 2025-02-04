@@ -28,6 +28,7 @@ class MystExecUsageVariable(ExecutionUsageVariable, CLIUsageVariable):
 class MystExecUsage(Usage):
     def __init__(self, data_dir, auto_collect_size):
         super().__init__()
+        self.scope = dict(use=self)
         self.recorder = {}
         self.data_dir = pathlib.Path(data_dir)
         self.auto_collect_size = auto_collect_size
@@ -58,7 +59,8 @@ class MystExecUsage(Usage):
                     with tempfile.TemporaryDirectory() as tmpdir:
                         tmpdir = pathlib.Path(tmpdir)
                         result.save(tmpdir / 'dirfmt')
-                        fp = shutil.make_archive(fp, 'zip', str(result))
+                        shutil.make_archive(fp, 'zip', str(result))
+                        fp += '.zip'
                 else:
                     fp = result.save(fp)
                 fp = pathlib.Path(fp)
