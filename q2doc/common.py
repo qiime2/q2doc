@@ -33,8 +33,6 @@ def write_plugin(dir, plugin_name):
 
     from qiime2.sdk import PluginManager
     pm = PluginManager()
-    plugin = pm.get_plugin(name=plugin_name)
-    diversity = pm.get_plugin(name='diversity')
 
     root = os.path.join(dir, 'Plugin-Reference')
     os.makedirs(root, exist_ok=True)
