@@ -24,17 +24,26 @@ class TransformUsage(Transform):
 
 
     def init_drivers(self):
+        drivers = []
+
         from q2doc.drivers.execution import MystExecUsage
+
         from q2doc.drivers.q2cli import MystCLIUsage
+        drivers.append(dict(name='[Command Line]', sync='cli', driver=MystCLIUsage(self.scope, AUTO_COLLECT)))
+
         from q2doc.drivers.python import MystPythonUsage
-        from q2doc.drivers.galaxy import MystGalaxyUsage
+        drivers.append(dict(name='[Python API]', sync='python', driver=MystPythonUsage(self.scope, AUTO_COLLECT)))
+
+        try:
+            from q2doc.drivers.galaxy import MystGalaxyUsage
+            drivers.append(dict(name='[Galaxy]', sync='galaxy', driver=MystGalaxyUsage(self.scope)))
+        except ModuleNotFoundError:
+            pass
+
         from q2doc.drivers.r import MystRtifactUsage
-        return (MystExecUsage(self.scope, AUTO_COLLECT), [
-            dict(name='[Command Line]', sync='cli', driver=MystCLIUsage(self.scope, AUTO_COLLECT)),
-            dict(name='[Python API]', sync='python', driver=MystPythonUsage(self.scope, AUTO_COLLECT)),
-            dict(name='[R API]', sync='r', driver=MystRtifactUsage(self.scope)),
-            dict(name='[Galaxy]', sync='galaxy', driver=MystGalaxyUsage(self.scope))
-        ])
+        drivers.append(dict(name='[R API]', sync='r', driver=MystRtifactUsage(self.scope)))
+
+        return (MystExecUsage(self.scope, AUTO_COLLECT), drivers)
 
     def setup_scope(self, node):
         scope = node['data'].get('scope')
