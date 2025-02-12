@@ -28,13 +28,13 @@ def write_bibtex(dir, refresh=True):
     citations.save(os.path.join(dir, 'q2doc.bib'))
 
 
-def write_plugin(dir, plugin_name):
+def write_plugin(dir, plugin_name, root_dir='plugin-reference'):
     _ = get_cache(refresh=True)
 
     from qiime2.sdk import PluginManager
     pm = PluginManager()
 
-    root = os.path.join(dir, 'Plugin-Reference')
+    root = os.path.join(dir, root_dir)
     os.makedirs(root, exist_ok=True)
 
     action_root = os.path.join(root, 'plugins')
