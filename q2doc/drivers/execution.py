@@ -152,7 +152,7 @@ class MystExecUsage(Usage):
                                                            action_name)
             output_dir = self.data_dir / dir_name
             output_dir.mkdir(exist_ok=True)
-            self.cli_use._rename_outputs(variables._asdict(), str(output_dir))
+            self.cli_use._rename_outputs(variables._asdict(), str(dir_name))
 
         for variable in variables:
             self._add_record(variable)

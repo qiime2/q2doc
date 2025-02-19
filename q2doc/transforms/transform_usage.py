@@ -5,7 +5,7 @@ import traceback
 import q2doc.myst as md
 
 
-
+is_preview = os.getenv('Q2DOC_PREVIEW') is not None
 
 def is_usage(node):
     return node.get('data', {}).get('source') == 'describe-usage'
@@ -70,7 +70,10 @@ class TransformUsage(Transform):
                 try:
                     exec_driver, drivers = self.setup_scope(node)
                     exec(source, exec_driver.scope)
-                    result = exec_driver.render(flush=True)
+                    if is_preview:
+                        result = []
+                    else:
+                        result = exec_driver.render(flush=True)
                     for interface in drivers:
                         exec(source, interface['driver'].scope)
                         rendered = interface['driver'].render(flush=True)

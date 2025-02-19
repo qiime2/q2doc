@@ -4,9 +4,13 @@ import os
 import psutil
 import random
 
-TRANSFORMS = [
-    TransformUsage
-]
+if os.getenv('Q2DOC_FASTMODE') is not None:
+    TRANSFORMS = []
+else:
+    TRANSFORMS = [
+        TransformUsage
+    ]
+
 HANDLERS = { t.name: t for t in TRANSFORMS }
 
 
