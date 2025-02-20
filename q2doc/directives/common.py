@@ -4,6 +4,8 @@ import q2doc.myst as md
 
 
 class DirectiveHandler:
+    has_cache = True
+
     @classmethod
     def as_spec(cls):
         return dict(name=cls.name,

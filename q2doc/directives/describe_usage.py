@@ -6,6 +6,7 @@ class DescribeUsage(DirectiveHandler):
     """A directive to describe a QIIME 2 usage example."""
     name = 'describe-usage'
     arg_help = 'No arguments'
+    has_cache = False
 
     @classmethod
     def cache_all(cls, pm):
