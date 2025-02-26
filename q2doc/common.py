@@ -28,7 +28,7 @@ def write_bibtex(dir, refresh=True):
     citations.save(os.path.join(dir, 'q2doc.bib'))
 
 
-def write_plugin(dir, plugin_name, root_dir='plugin-reference'):
+def write_plugin(dir, plugins, root_dir='plugin-reference'):
     _ = get_cache(refresh=True)
 
     from qiime2.sdk import PluginManager
@@ -40,6 +40,8 @@ def write_plugin(dir, plugin_name, root_dir='plugin-reference'):
     action_root = os.path.join(root, 'plugins')
     os.makedirs(action_root, exist_ok=True)
     for name, plugin in pm.plugins.items():
+        if plugins and name not in plugins:
+            continue
         plugin_root = os.path.join(action_root, name)
         os.makedirs(plugin_root, exist_ok=True)
         with open(os.path.join(plugin_root, 'index.md'), 'w') as fh:
@@ -61,6 +63,8 @@ def write_plugin(dir, plugin_name, root_dir='plugin-reference'):
     with open(os.path.join(artifacts_root, 'classes.md'), 'w') as fh:
         fh.write('# Artifact Classes\n\n')
         for name, plugin in pm.plugins.items():
+            if plugins and name not in plugins:
+                continue
             if not plugin.artifact_classes:
                 continue
 
@@ -73,6 +77,8 @@ def write_plugin(dir, plugin_name, root_dir='plugin-reference'):
     with open(os.path.join(artifacts_root, 'formats.md'), 'w') as fh:
         fh.write('# Formats\n\n')
         for name, plugin in pm.plugins.items():
+            if plugins and name not in plugins:
+                continue
             if not plugin.formats:
                 continue
 
