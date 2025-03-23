@@ -3,7 +3,7 @@ name = "q2doc"
 authors = [
     { name = "Evan Bolyen", email = "developers@qiime2.org" }
 ]
-description = "Generate MystMD documentation from a qiime2 plugin"
+description = "Generate MystMD documentation from a qiime2 deployment."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
 dynamic = ["version"]
