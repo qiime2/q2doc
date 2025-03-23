@@ -40,7 +40,7 @@ class DescribeAction(DirectiveHandler):
         if (util.is_primitive_type(qiime_type)
                 or util.is_visualization_type(qiime_type)
                 or util.is_collection_type(qiime_type)):
-            url = f'xref:qiime2#qiime2.plugin.{qiime_type.name}'
+            url = f'xref:q2doc-api-target#qiime2.plugin.{qiime_type.name}'
             ast.append(md.link_ast(md.inline_code_ast(qiime_type.name), url))
 
             if qiime_type.fields:
@@ -60,7 +60,7 @@ class DescribeAction(DirectiveHandler):
                 return [md.inline_code_ast(str(qiime_type))]
 
         if qiime_type.predicate:
-            url = f'xref:qiime2#qiime2.plugin.{qiime_type.predicate.name}'
+            url = f'xref:q2doc-api-target#qiime2.plugin.{qiime_type.predicate.name}'
             ast.append(md.inline_code_ast(' % '))
             ast.append(md.link_ast(md.inline_code_ast(str(qiime_type.predicate.name)), url))
             ast.append(md.inline_code_ast(str(qiime_type.predicate)[len(qiime_type.predicate.name):]))
