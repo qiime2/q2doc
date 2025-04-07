@@ -67,14 +67,15 @@ def myst(directive, transform, stdin):
 @click.argument('book')
 @click.option('--validate/--no-validate', default=True)
 @click.option('--plugin', default=None, multiple=True)
+@click.option('--singlepage', is_flag=True, default=False)
 @click.option('--output', default='plugin-reference')
-def autodoc(book, validate, plugin, output):
+def autodoc(book, validate, plugin, singlepage, output):
     if validate and not is_book(book):
         raise ValueError(
             f'The provided directory ({book}) does not appear to contain '
             'a Jupyter Book.')
 
-    write_plugin(book, plugin, output)
+    write_plugin(book, plugin, singlepage, output)
     write_bibtex(book, refresh=False)
 
 if __name__ == '__main__':

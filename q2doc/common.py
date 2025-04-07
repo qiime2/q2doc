@@ -28,7 +28,7 @@ def write_bibtex(dir, refresh=True):
     citations.save(os.path.join(dir, 'q2doc.bib'))
 
 
-def write_plugin(dir, plugins, root_dir='plugin-reference'):
+def write_plugin(dir, plugins, singlepage=False, root_dir='plugin-reference'):
     _ = get_cache(refresh=True)
 
     from qiime2.sdk import PluginManager
@@ -42,20 +42,34 @@ def write_plugin(dir, plugins, root_dir='plugin-reference'):
     for name, plugin in pm.plugins.items():
         if plugins and name not in plugins:
             continue
-        plugin_root = os.path.join(action_root, name)
-        os.makedirs(plugin_root, exist_ok=True)
-        with open(os.path.join(plugin_root, 'index.md'), 'w') as fh:
-            fh.write(md.frontmatter_yml(title="Plugin Overview"))
-            fh.write(md.directive_md('describe-plugin', name))
 
-        if not plugin.actions:
-            continue
+        if singlepage:
+            with open(os.path.join(action_root, f'{plugin.name}.md'), 'w') as fh:
+                fh.write(md.frontmatter_yml(title=plugin.name))
+                fh.write(md.directive_md('describe-plugin', name))
+                if not plugin.actions:
+                    continue
+                else:
+                    fh.write('---\n\n')
+                for idx, action in enumerate(plugin.actions):
+                    fh.write('---\n\n')
+                    action = action.replace('_', '-')
+                    fh.write(md.directive_md('describe-action', f'{name} {action}'))
+        else:
+            plugin_root = os.path.join(action_root, name)
+            os.makedirs(plugin_root, exist_ok=True)
+            with open(os.path.join(plugin_root, 'index.md'), 'w') as fh:
+                fh.write(md.frontmatter_yml(title="Plugin Overview"))
+                fh.write(md.directive_md('describe-plugin', name))
 
-        for idx, action in enumerate(plugin.actions):
-            action = action.replace('_', '-')
-            with open(os.path.join(plugin_root, f'{idx}-{action}.md'), 'w') as fh:
-                fh.write(md.frontmatter_yml(title=action))
-                fh.write(md.directive_md('describe-action', f'{name} {action}'))
+            if not plugin.actions:
+                continue
+
+            for idx, action in enumerate(plugin.actions):
+                action = action.replace('_', '-')
+                with open(os.path.join(plugin_root, f'{idx}-{action}.md'), 'w') as fh:
+                    fh.write(md.frontmatter_yml(title=action))
+                    fh.write(md.directive_md('describe-action', f'{name} {action}'))
 
     artifacts_root = os.path.join(root, 'artifacts')
     os.makedirs(artifacts_root, exist_ok=True)

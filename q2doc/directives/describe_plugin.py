@@ -17,7 +17,7 @@ class DescribePlugin(DirectiveHandler):
 
     @classmethod
     def format_record(cls, name, plugin):
-        ast = [md.heading_ast(1, name, id=plugin_to_id(plugin))]
+        ast = [md.heading_ast(1, 'Plugin Overview', id=plugin_to_id(plugin))]
         ast.extend(format_paragraphs(plugin.description))
 
         citations = []
