@@ -22,6 +22,10 @@ class TransformUsage(Transform):
         self.ctx = {}
         self.drivers = []
 
+        # Initialize a plugin manager so that it is
+        # defined for the usage examples
+        import qiime2.sdk as sdk
+        sdk.PluginManager()
 
     def init_drivers(self):
         drivers = []
