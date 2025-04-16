@@ -34,6 +34,14 @@ def write_plugin(dir, plugins, singlepage=False, root_dir='plugin-reference'):
     from qiime2.sdk import PluginManager
     pm = PluginManager()
 
+    if plugins is not None:
+        missing_plugins = set(plugins) - pm.plugins.keys()
+        if len(missing_plugins) > 0:
+            msg = ("One or more requested plugins not detected in deployment.\n"
+                  f" Missing plugins: {' '.join(missing_plugins)}\n"
+                  f" Deployed plugins: {' '.join(pm.plugins.keys())}")
+            raise ValueError(msg)
+
     root = os.path.join(dir, root_dir)
     os.makedirs(root, exist_ok=True)
 
