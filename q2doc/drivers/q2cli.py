@@ -1,7 +1,9 @@
+from qiime2.sdk.usage import Usage
 from q2cli.core.usage import CLIUsage
 import q2doc.myst as md
 
 from .common import _build_url
+
 
 class MystCLIUsage(CLIUsage):
     def __init__(self, data_dir, auto_collect_size):
@@ -45,6 +47,24 @@ class MystCLIUsage(CLIUsage):
             self.recorder.append('unzip -d %s %s' % (zip_fp, out_fp))
 
         return var
+
+    def construct_artifact_collection(self, name, members):
+        # HACK: use shortcut in the usagevar specific to q2cli
+        variable = Usage.construct_artifact_collection(
+            self, name, members
+        )
+        variable._members = members  # save for later
+        variable._q2cli_ref = ' '.join([f'{key}:{value.to_interface_name()}'
+                                        for (key, value) in members.items()])
+
+        return variable
+
+    def get_artifact_collection_member(self, name, variable, key):
+        # HACK: identify implicit construction and ignore it
+        if hasattr(variable, '_q2cli_ref'):
+            return variable._members[key]
+
+        return super().get_artifact_collection_member(name, variable, key)
 
     def render(self, flush=False, **kwargs):
         rendered = super().render(flush)
