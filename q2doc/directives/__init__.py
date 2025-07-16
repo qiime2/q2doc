@@ -26,7 +26,7 @@ def spec_directives():
 def run_directive(directive, data):
     cache = get_cache()
     arg = data.get('arg')
-    options = data['options']
+    options = data.get('options', {})
     node = data['node']
 
     if HANDLERS[directive].has_cache:
