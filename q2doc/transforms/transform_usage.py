@@ -8,7 +8,12 @@ import q2doc.myst as md
 is_preview = os.getenv('Q2DOC_PREVIEW') is not None
 
 def is_usage(node):
-    return node.get('data', {}).get('source') == 'describe-usage'
+    data = node.get('data', {})
+    if not isinstance(data, dict):
+        # Jupyter notebook outputs or other custom directives
+        return False
+    else:
+        return data.get('source') == 'describe-usage'
 
 AUTO_COLLECT = 4
 
