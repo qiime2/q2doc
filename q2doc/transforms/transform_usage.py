@@ -78,10 +78,10 @@ class TransformUsage(Transform):
                 tabs = []
                 try:
                     exec_driver, drivers = self.setup_scope(node)
-                    exec(source, exec_driver.scope)
                     if is_preview:
                         result = []
                     else:
+                        exec(source, exec_driver.scope)
                         result = exec_driver.render(flush=True)
                     for interface in drivers:
                         exec(source, interface['driver'].scope)
