@@ -45,7 +45,10 @@ class TransformUsage(Transform):
 
         try:
             from q2doc.drivers.galaxy import MystGalaxyUsage
-            drivers.append(dict(name='[Galaxy]', sync='galaxy', driver=MystGalaxyUsage(self.scope)))
+            # HACK: galaxy has to execute certain imports to further inspect them.
+            # so remove galaxy if is_preview is true
+            if not is_preview:
+                drivers.append(dict(name='[Galaxy]', sync='galaxy', driver=MystGalaxyUsage(self.scope)))
         except ModuleNotFoundError:
             pass
 
@@ -72,9 +75,11 @@ class TransformUsage(Transform):
     def run(self, ast):
         coroutine = ast_walk(ast)
         node = None
+        failure = False
         while node := coroutine.send(node):
             if is_usage(node):
                 source = node['value']
+                hide = node['data'].get('hide', False)
                 tabs = []
                 try:
                     exec_driver, drivers = self.setup_scope(node)
@@ -91,6 +96,7 @@ class TransformUsage(Transform):
                         tabs.append(md.tabitem_ast(rendered, interface['name'],
                                                    sync=interface['sync']))
                 except Exception:
+                    failure = True
                     result = [md.code_ast('python', traceback.format_exc())]
 
 
@@ -99,6 +105,9 @@ class TransformUsage(Transform):
                     md.tabitem_ast(node, '[View Source]', sync='raw')
                 )
 
-                node = md.block_ast([tabset, *result])
+                if hide and not failure:
+                    node = md.block_ast([])
+                else:
+                    node = md.block_ast([tabset, *result])
 
         return ast
