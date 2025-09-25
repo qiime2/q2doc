@@ -18,11 +18,15 @@ class DescribeUsage(DirectiveHandler):
             'scope': dict(
                 type='string',
                 help='A directory where results will be saved. Will be treated as a unique namespace'
+            ),
+            'hide': dict(
+                type='boolean',
+                help='Evaluate the directive, but hide it from the final output.'
             )
         }
 
     @classmethod
-    def apply_options(cls, ast, node, scope=None):
+    def apply_options(cls, ast, node, scope=None, hide=False):
         ast = md.code_ast('python', node['value'])
-        ast['data'] = dict(deferred=True, scope=scope, source='describe-usage')
+        ast['data'] = dict(deferred=True, scope=scope, hide=hide, source='describe-usage')
         return [ast]
