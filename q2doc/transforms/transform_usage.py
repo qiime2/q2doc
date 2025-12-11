@@ -6,6 +6,7 @@ import q2doc.myst as md
 
 
 is_preview = os.getenv('Q2DOC_PREVIEW') is not None
+ignore_errors = os.getenv('Q2DOC_IGNORE_ERRORS') is not None
 
 def is_usage(node):
     data = node.get('data', {})
@@ -96,6 +97,9 @@ class TransformUsage(Transform):
                         tabs.append(md.tabitem_ast(rendered, interface['name'],
                                                    sync=interface['sync']))
                 except Exception:
+                    if not ignore_errors:
+                        raise Exception
+
                     failure = True
                     result = [md.code_ast('python', traceback.format_exc())]
 
