@@ -98,7 +98,7 @@ class TransformUsage(Transform):
                                                    sync=interface['sync']))
                 except Exception:
                     if not ignore_errors:
-                        raise Exception
+                        raise
 
                     failure = True
                     result = [md.code_ast('python', traceback.format_exc())]
