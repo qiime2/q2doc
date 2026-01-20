@@ -6,6 +6,7 @@ import shutil
 import tempfile
 from contextlib import redirect_stderr, redirect_stdout, contextmanager
 
+from qiime2 import ResultCollection
 from qiime2.util import redirected_stdio
 from qiime2.plugin import model
 from qiime2.sdk.usage import Usage, ExecutionUsageVariable
@@ -55,7 +56,8 @@ class MystExecUsage(Usage):
                 fp = str(self.data_dir / fn)
                 if type(result) is str:
                     os.symlink(result, fp)
-                elif isinstance(result, model.DirectoryFormat):
+                elif isinstance(result,
+                        (model.DirectoryFormat, ResultCollection)):
                     with tempfile.TemporaryDirectory() as tmpdir:
                         tmpdir = pathlib.Path(tmpdir)
                         result.save(tmpdir / 'dirfmt')
