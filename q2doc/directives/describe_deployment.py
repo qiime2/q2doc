@@ -12,7 +12,7 @@ class DescribeDeployment(DirectiveHandler):
         ast = {}
 
         rows = []
-        for name, plugin in pm.plugins.items():
+        for name, plugin in sorted(pm.plugins.items(), key=lambda x: x[0]):
             rows.append([md.cross_reference_ast(md.inline_code_ast(plugin.name),
                                                 id=plugin_to_id(plugin)),
                          plugin.short_description])
