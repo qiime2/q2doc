@@ -1,5 +1,6 @@
 import os
-import urllib
+import urllib.parse
+
 
 def _build_url(data_dir, fn):
     baseurl = os.environ.get('BASE_URL')

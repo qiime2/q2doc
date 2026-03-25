@@ -1,6 +1,6 @@
 import os
 import io
-import urllib
+import urllib.parse
 import pathlib
 import shutil
 import tempfile
@@ -15,6 +15,7 @@ from q2cli.core.usage import CLIUsage, CLIUsageVariable
 import q2doc.myst as md
 
 from .common import _build_url
+from .zenodo import ZenodoURLMixin
 
 
 
@@ -25,7 +26,7 @@ class MystExecUsageVariable(ExecutionUsageVariable, CLIUsageVariable):
     pass
 
 
-class MystExecUsage(Usage):
+class MystExecUsage(ZenodoURLMixin, Usage):
     def __init__(self, data_dir, auto_collect_size):
         super().__init__()
         self.scope = dict(use=self)

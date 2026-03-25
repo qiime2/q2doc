@@ -13,6 +13,7 @@ from q2galaxy.core.templaters.common import (make_tool_name_from_id,
 from q2galaxy.core.util import pretty_fmt_name
 
 from .common import _build_url
+from .zenodo import ZenodoURLMixin
 import q2doc.myst as md
 from q2doc.directives.common import format_text
 
@@ -58,7 +59,7 @@ def format_bullets(bullets):
     return md.list_ast(*entries, ordered=len(entries) > 1)
 
 
-class MystGalaxyUsage(GalaxyBaseUsage):
+class MystGalaxyUsage(ZenodoURLMixin, GalaxyBaseUsage):
     def __init__(self, data_dir):
         super().__init__()
         self.scope = dict(use=self)
@@ -380,4 +381,3 @@ class MystGalaxyUsage(GalaxyBaseUsage):
             self.ast = []
 
         return ast
-

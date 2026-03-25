@@ -8,6 +8,7 @@ from q2cli.core.usage import CLIUsageVariable
 
 import q2doc.myst as md
 from .common import _build_url
+from .zenodo import ZenodoURLMixin
 
 
 class RtifactAPIUsageVariable(usage.UsageVariable):
@@ -82,7 +83,7 @@ class RtifactAPIUsageVariable(usage.UsageVariable):
         self.use._add(lines)
 
 
-class RtifactAPIUsage(usage.Usage):
+class RtifactAPIUsage(ZenodoURLMixin, usage.Usage):
     INDENT = ' ' * 4
 
     @dataclass(frozen=True)

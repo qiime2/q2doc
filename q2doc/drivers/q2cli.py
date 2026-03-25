@@ -3,9 +3,10 @@ from q2cli.core.usage import CLIUsage
 import q2doc.myst as md
 
 from .common import _build_url
+from .zenodo import ZenodoURLMixin
 
 
-class MystCLIUsage(CLIUsage):
+class MystCLIUsage(ZenodoURLMixin, CLIUsage):
     def __init__(self, data_dir, auto_collect_size):
         super().__init__(action_collection_size=auto_collect_size)
         self.scope = dict(use=self)

@@ -2,10 +2,11 @@ from qiime2.plugins import ArtifactAPIUsage
 from q2cli.core.usage import CLIUsageVariable
 
 from .common import _build_url
+from .zenodo import ZenodoURLMixin
 import q2doc.myst as md
 
 
-class MystPythonUsage(ArtifactAPIUsage):
+class MystPythonUsage(ZenodoURLMixin, ArtifactAPIUsage):
     def __init__(self, data_dir, auto_collect_size):
         super().__init__(action_collection_size=auto_collect_size)
         self.scope = dict(use=self)
