@@ -56,12 +56,17 @@ class MystExecUsage(Usage):
                 fp = str(self.data_dir / fn)
                 if type(result) is str:
                     os.symlink(result, fp)
-                elif isinstance(result,
-                        (model.DirectoryFormat, ResultCollection)):
+                elif isinstance(result, model.DirectoryFormat):
                     with tempfile.TemporaryDirectory() as tmpdir:
                         tmpdir = pathlib.Path(tmpdir)
                         result.save(tmpdir / 'dirfmt')
                         shutil.make_archive(fp, 'zip', str(result))
+                        fp += '.zip'
+                elif isinstance(result, ResultCollection):
+                    with tempfile.TemporaryDirectory() as tmpdir:
+                        temp_path = pathlib.Path(tmpdir) / 'collection'
+                        result.save(temp_path)
+                        shutil.make_archive(fp, 'zip', temp_path)
                         fp += '.zip'
                 else:
                     fp = result.save(fp)
