@@ -6,6 +6,7 @@ import shutil
 import tempfile
 from contextlib import redirect_stderr, redirect_stdout, contextmanager
 
+from qiime2 import ResultCollection
 from qiime2.util import redirected_stdio
 from qiime2.plugin import model
 from qiime2.sdk.usage import Usage, ExecutionUsageVariable
@@ -60,6 +61,12 @@ class MystExecUsage(Usage):
                         tmpdir = pathlib.Path(tmpdir)
                         result.save(tmpdir / 'dirfmt')
                         shutil.make_archive(fp, 'zip', str(result))
+                        fp += '.zip'
+                elif isinstance(result, ResultCollection):
+                    with tempfile.TemporaryDirectory() as tmpdir:
+                        temp_path = pathlib.Path(tmpdir) / 'collection'
+                        result.save(temp_path)
+                        shutil.make_archive(fp, 'zip', temp_path)
                         fp += '.zip'
                 else:
                     fp = result.save(fp)
