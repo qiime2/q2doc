@@ -34,6 +34,7 @@ class DescribePlugin(DirectiveHandler):
         ast.append(md.heading_ast(2, 'Actions', id=False))
         rows = []
         for name, action in plugin.actions.items():
+            if name.startswith('_'): continue
             plugin_name = md.cross_reference_ast(name.replace('_','-'), action_to_id(action))
             if action.deprecated:
                 plugin_name = md.text_ast(plugin_name, style='delete')
