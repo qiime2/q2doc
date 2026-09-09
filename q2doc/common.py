@@ -60,6 +60,7 @@ def write_plugin(dir, plugins, singlepage=False, root_dir='plugin-reference'):
                 else:
                     fh.write('---\n\n')
                 for idx, action in enumerate(plugin.actions):
+                    if action.startswith('_'): continue
                     fh.write('---\n\n')
                     action = action.replace('_', '-')
                     fh.write(md.directive_md('describe-action', f'{name} {action}'))
@@ -74,6 +75,7 @@ def write_plugin(dir, plugins, singlepage=False, root_dir='plugin-reference'):
                 continue
 
             for idx, action in enumerate(plugin.actions):
+                if action.startswith('_'): continue
                 action = action.replace('_', '-')
                 with open(os.path.join(plugin_root, f'{idx}-{action}.md'), 'w') as fh:
                     fh.write(md.frontmatter_yml(title=action))
